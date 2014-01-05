@@ -1,5 +1,5 @@
-pyfs
-====
+# pyfs
+
 
 Mount python — it's fun, not a typo, and next to pointless!
 
@@ -61,7 +61,7 @@ Or, you can get rid of the imported modules:
 
 The whole thing started, when I had [a look at Python's FUSE modules](http://mknecht.github.io/fuse-and-python/). If you want an overview about those, go over there.
 
-== More weird ideas
+## More weird ideas
 
 * `$ lib/SimpleHttpServer/.self 8080   # python -m SimpleHttpServer 8080`
 * `$ lib/re/match --help   # get the doc`
