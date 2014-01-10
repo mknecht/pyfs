@@ -36,6 +36,11 @@ You can have a look at the docstring, if need be:
 
 Come on, that is cool, yes? Sure, it's a whee bit superfluous, a solution to no problem, but, hey, it'll get much better soon! Promise!
 
+The whole thing started, when I had [a look at Python's FUSE modules](http://mknecht.github.io/fuse-and-python/). If you want an overview about those, go over there.
+
+
+## The structure of the filesystem
+
 How does the root of the mountpoint look like? For example, like so:
 
     $ tree -L 2
@@ -50,6 +55,9 @@ How does the root of the mountpoint look like? For example, like so:
         └── modules
     
     7 directories, 1 file
+
+
+## Runtime modifications
 
 Wonder what `run/modules` does? It's a file. You can `cat` it:
 
@@ -77,8 +85,6 @@ Or, you can get rid of the imported modules:
     $ ls lib/
     $ cat run/modules 
     $ 
-
-The whole thing started, when I had [a look at Python's FUSE modules](http://mknecht.github.io/fuse-and-python/). If you want an overview about those, go over there.
 
 ## More weird ideas
 
