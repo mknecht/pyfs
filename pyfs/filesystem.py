@@ -19,7 +19,7 @@ import sys
 
 import fuse
 
-from pyfs.common import (
+from pyfs.mapping import (
     add_module,
     is_dir,
     is_executable,

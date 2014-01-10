@@ -14,6 +14,25 @@ Yes, that's `os.path.join` doing the work. Or look at this:
 
     lib$ string/capwords "let's do some python … not."
     Let's Do Some Python … Not.
+	lib$ string/capwords once-more-unto-the-breach -
+	Once-More-Unto-The-Breach
+
+You can have a look at the docstring, if need be:
+
+    lib$ os/path/join -h
+    usage: join [-h] [funcargs [funcargs ...]]
+    
+    Join two or more pathname components, inserting '/' as needed. If any
+    component is an absolute path, all previous path components will be discarded.
+    An empty last part will result in a path that ends with a separator.
+    
+    positional arguments:
+      funcargs
+    
+    optional arguments:
+      -h, --help  show this help message and exit
+    ~/test-pyfs$ 
+    
 
 Come on, that is cool, yes? Sure, it's a whee bit superfluous, a solution to no problem, but, hey, it'll get much better soon! Promise!
 
@@ -63,10 +82,12 @@ The whole thing started, when I had [a look at Python's FUSE modules](http://mkn
 
 ## More weird ideas
 
+* Transform arguments by introspection:
+  * positional parameters are made explicit by adding them to the argparse Parser
+  * keyword parameters are turned into optional argparse arguments
 * `$ lib/SimpleHttpServer/.self 8080   # python -m SimpleHttpServer 8080`
-* `$ lib/re/match --help   # get the doc`
 * provide symlinks for lib/__builtin__/*
-* be able to use pipes: `$ echo blub | lib/re/match "\w" | lib/__builtin__/bool` (need to think about the shell always using strings, whereas some py functions expect other types …)
+* be able to use pipes: `$ echo blub | lib/re/match "\w" (run/stdin) | lib/__builtin__/bool` (need to think about the shell always using strings, whereas some py functions expect other types …)
 * access object methods (this sucks, a functional language would be much easier), i.e. $ lib/os/path/join my path | bin/dot count /
 * provide a meta function to install packages in some virtualenv, so they can be loaded. (can I create a virtualenv at startup in memory and use that? /temp would be another option)
 

@@ -1,9 +1,12 @@
+from __future__ import absolute_import
 import errno
 import importlib
 import logging
 import os
 import traceback
 import types
+
+from pyfs.log import logcall
 
 
 log = logging.getLogger(__name__)
@@ -26,55 +29,12 @@ VALUE_TYPES = [
     types.TupleType,
 ]
 
-__EXEC_TEMPLATE = """#!/usr/bin/python
-
-import sys
-import {modulename}
-
-if __name__ == '__main__':
-    print({modulename}.{functionname}(*sys.argv[1:]))
-
-"""
-
 PATH_MODULES = "/run/modules"
 
 root_namespace = {
     "run": {"modules": None},
     "lib": {},
 }
-
-
-def logcall(f):
-    log = logging.getLogger(f.__name__)
-
-    def getattrs(o):
-        collected = []
-        for name in dir(o):
-            if name.startswith("logme_"):
-                collected.append("{}={}".format(name[6:], getattr(o, name)))
-        return "{}({})".format(o.__class__.__name__, ", ".join(collected))
-
-    def logged(*args, **kw):
-        log.debug("Calling {}(*{}, **{}) on {}".format(
-            f.__name__, args, kw, None if not args else getattrs(args[0])))
-        try:
-            ret = f(*args, **kw)
-        except Exception:
-            log.debug(
-                "Called: {}(*{}, **{}) on {} and got exception {}".format(
-                    f.__name__,
-                    args,
-                    kw,
-                    None if not args else getattrs(args[0]),
-                    traceback.format_exc(),
-                )
-            )
-            raise
-        log.debug("Called: {}(*{}, **{}) on {} -> {}".format(
-            f.__name__, args, kw, None if not args else getattrs(args[0]), ret
-        ))
-        return ret
-    return logged
 
 
 def is_dir(path):
@@ -154,7 +114,7 @@ def get_content(path):
     if path == PATH_MODULES:
         return "\n".join(_get_modules())
     else:
-        return _render_template(path)
+        return _get_content_for_path(path)
 
 
 def _get_modules():
@@ -165,13 +125,26 @@ def _path_to_qname(path):
     return [n for n in path.split("/") if n]
 
 
+def _render_template(filename, **kwargs):
+    with open(
+            os.path.join(
+                os.path.dirname(__file__),
+                "..",
+                "templates",
+                filename,
+            )
+            ) as f:
+        return f.read().format(**kwargs)
+
+
 @logcall
-def _render_template(path):
+def _get_content_for_path(path):
     qname = _path_to_qname(path)
     if is_executable(path):
-        return __EXEC_TEMPLATE.format(
+        return _render_template(
+            "call_thing",
             modulename=".".join(qname[1:-1]),
-            functionname=qname[-1],
+            thingname=qname[-1],
         )
     elif _is_datafile(path):
         obj = _resolve(qname)

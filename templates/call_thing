@@ -1,0 +1,19 @@
+#!/usr/bin/python
+
+import argparse
+import pydoc
+import sys
+import {modulename}
+
+
+def parse_args(func):
+    parser = argparse.ArgumentParser(description=pydoc.render_doc(func))
+    parser.add_argument("funcargs", nargs="*")
+    return parser.parse_args()
+
+
+if __name__ == '__main__':
+    executable = {modulename}.{thingname}
+    args = parse_args(executable)
+    result = executable(*args.funcargs)
+    print(result)
