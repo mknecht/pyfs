@@ -86,7 +86,14 @@ Or, you can get rid of the imported modules:
     $ cat run/modules 
     $ 
 
-## More weird ideas
+## Piping
+
+Use pipes to concatenate Python commands. The dash character, “-”, marks the place where each element should go.
+
+	lib$ echo Hello World | string/index - Wor | string/zfill - 10
+	0000000006
+
+## More weird ideas for the future
 
 * Transform arguments by introspection:
   * positional parameters are made explicit by adding them to the argparse Parser
