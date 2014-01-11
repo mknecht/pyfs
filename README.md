@@ -100,7 +100,6 @@ Use pipes to concatenate Python commands. The dash character, “-”, marks the
   * keyword parameters are turned into optional argparse arguments
 * `$ lib/SimpleHttpServer/.self 8080   # python -m SimpleHttpServer 8080`
 * provide symlinks for lib/__builtin__/*
-* be able to use pipes: `$ echo blub | lib/re/match "\w" (run/stdin) | lib/__builtin__/bool` (need to think about the shell always using strings, whereas some py functions expect other types …)
 * access object methods (this sucks, a functional language would be much easier), i.e. $ lib/os/path/join my path | bin/dot count /
 * provide a meta function to install packages in some virtualenv, so they can be loaded. (can I create a virtualenv at startup in memory and use that? /temp would be another option)
 
