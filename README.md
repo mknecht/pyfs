@@ -93,6 +93,24 @@ Use pipes to concatenate Python commands. The dash character, “-”, marks the
 	lib$ echo Hello World | string/index - Wor | string/zfill - 10
 	0000000006
 
+## Object attributes
+
+You can access attributes of an object using the directory `dir`. The attribute names cannot be resolved automatically, but if you know what you want, you'll get it.
+
+    echo Hallo | dot/__doc__
+    str(object='') -> string
+    
+    Return a nice string representation of the object.
+    If the argument is a string, the return value is the same object.
+
+If the attribute is callable, it will be called with the given arguments.
+
+    $ echo Hello world | dot/split | lib/string/join ' -> '
+    Hello -> world
+
+    $ echo Hello=world | dot/split = | lib/string/join ' -> '
+    Hello -> world
+
 ## More weird ideas for the future
 
 * Transform arguments by introspection:
@@ -100,7 +118,6 @@ Use pipes to concatenate Python commands. The dash character, “-”, marks the
   * keyword parameters are turned into optional argparse arguments
 * `$ lib/SimpleHttpServer/.self 8080   # python -m SimpleHttpServer 8080`
 * provide symlinks for lib/__builtin__/*
-* access object methods (this sucks, a functional language would be much easier), i.e. $ lib/os/path/join my path | bin/dot count /
 * provide a meta function to install packages in some virtualenv, so they can be loaded. (can I create a virtualenv at startup in memory and use that? /temp would be another option)
 
 To be continued …

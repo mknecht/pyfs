@@ -1,10 +1,13 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import argparse
-import json
 import pydoc
 import sys
 import {modulename}
+
+sys.path.append("{pyfs_module_path}")
+
+from pyfs.scriptsupport import exit_with, run_for_input
 
 
 def parse_args():
@@ -14,58 +17,8 @@ def parse_args():
     return parser.parse_args()
 
 
-def run_with(funcargs):
-    res = {modulename}.{thingname}(*funcargs)
-    if res is not None:
-        print(encode_output(res))
-
-
-def decode_input(s):
-    try:
-        return json.loads(s)
-    except ValueError:
-        return s
-
-
-def encode_output(obj):
-    if isinstance(obj, basestring):
-        return obj
-    try:
-        return json.dumps(obj)
-    except TypeError:
-        return repr(obj)
-
-
-def decode_strings(encoded):
-    return [decode_input(el) for el in encoded]
-
-
-def get_line_from_stdin():
-    buff = ''
-    while True:
-        ch = sys.stdin.read(1)
-        if len(ch) == 0:  # end of file
-            break
-        buff += ch
-        if buff.endswith('\n'):
-            yield buff
-            buff = ''
-
-
 def main():
-    args = parse_args()
-    if not sys.stdin.isatty():
-        stdin_idx = args.funcargs.index("-") if "-" in args.funcargs else None
-        for line in get_line_from_stdin():
-            element = decode_input(line)
-            funcargs = decode_strings(args.funcargs)
-            if stdin_idx is not None:
-                funcargs[stdin_idx:stdin_idx+1] = [element]
-            else:
-                funcargs[0:0] = [element]
-            run_with(funcargs)
-    else:
-        run_with(decode_strings(args.funcargs))
+    exit_with(run_for_input({modulename}.{thingname}, parse_args().funcargs))
 
 
 if __name__ == '__main__':

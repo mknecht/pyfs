@@ -27,6 +27,7 @@ from pyfs.mapping import (
     get_content,
     get_elements,
     logcall,
+    PATH_DOT_PREFIX,
     PATH_MODULES,
     read_from_string,
     reset_modules_list,
@@ -39,7 +40,7 @@ class PyFS(fuse.Operations):
         super(PyFS, self).__init__()
         self._next_fh = count()
         self._flags_for_open_files = {}  # file handle -> fh
-        for name in ("json", "os", "sys"):
+        for name in ("json", "os", "re", "string", "sys"):
             add_module(name)
         self._log = logging.getLogger(self.__class__.__name__)
 
@@ -50,6 +51,12 @@ class PyFS(fuse.Operations):
                 st_mode=stat.S_IFDIR | 0555,
                 st_nlink=2,
             )
+        elif path.startswith(PATH_DOT_PREFIX) and not "." in path:
+            return dict(
+                st_mode=stat.S_IFREG | 0555,
+                st_nlink=1,
+                st_size=len(get_content(path)),
+            )
         elif is_dir(path):
             return dict(
                 st_mode=stat.S_IFDIR | 0555,
@@ -57,10 +64,10 @@ class PyFS(fuse.Operations):
             )
         elif is_file(path):
             def _get_file_mode():
-                if is_executable(path):
-                    return 0555
-                elif path == PATH_MODULES:
+                if path == PATH_MODULES:
                     return 0666
+                elif is_executable(path):
+                    return 0555
                 else:
                     return 0444
             return dict(

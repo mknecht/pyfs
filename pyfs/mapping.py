@@ -29,9 +29,11 @@ VALUE_TYPES = [
     types.TupleType,
 ]
 
+PATH_DOT_PREFIX = "/dot/"
 PATH_MODULES = "/run/modules"
 
 root_namespace = {
+    "dot": {},
     "run": {"modules": None},
     "lib": {},
 }
@@ -113,6 +115,8 @@ def reset_modules_list():
 def get_content(path):
     if path == PATH_MODULES:
         return "\n".join(_get_modules())
+    elif path.startswith(PATH_DOT_PREFIX):
+        return _render_template("dot", attr_name=path[len(PATH_DOT_PREFIX):])
     else:
         return _get_content_for_path(path)
 
@@ -126,6 +130,10 @@ def _path_to_qname(path):
 
 
 def _render_template(filename, **kwargs):
+    assignments = dict(**kwargs)
+    assignments["pyfs_module_path"] = (
+        os.path.join(os.path.dirname(__file__), ".."))
+
     with open(
             os.path.join(
                 os.path.dirname(__file__),
@@ -134,7 +142,7 @@ def _render_template(filename, **kwargs):
                 filename,
             )
             ) as f:
-        return f.read().format(**kwargs)
+        return f.read().format(**assignments)
 
 
 @logcall

@@ -1,0 +1,43 @@
+#!/usr/bin/env python
+from __future__ import absolute_import
+
+import argparse
+import pydoc
+import sys
+
+sys.path.append("{pyfs_module_path}")
+
+from pyfs.scriptsupport import exit_with, run_for_input, run_with
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="""Access the attribute '{attr_name}' of the piped object.
+    If it can be called, call it with the given arguments."""
+    )
+    parser.add_argument("funcargs", nargs="*")
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+
+    def resolve_and_maybe_call(o, name):
+        res = getattr(o, name)
+        try:
+            return res(*args.funcargs)
+        except TypeError, e:
+            return res
+
+    exit_with(
+        run_for_input(
+            resolve_and_maybe_call,
+            ["-", "{attr_name}"])
+    )
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+       sys.stdout.flush()
