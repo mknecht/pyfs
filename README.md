@@ -95,7 +95,7 @@ Use pipes to concatenate Python commands. The dash character, “-”, marks the
 
 ## Object attributes
 
-You can access attributes of an object using the directory `dir`. The attribute names cannot be resolved automatically, but if you know what you want, you'll get it.
+You can access attributes of an object using the directory `dot`. The attribute names cannot be resolved automatically, but if you know what you want, you'll get it.
 
     echo Hallo | dot/__doc__
     str(object='') -> string
