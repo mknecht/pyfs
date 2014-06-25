@@ -39,6 +39,12 @@ root_namespace = {
 }
 
 
+class CannotResolve(RuntimeError):
+    def __init__(self, qname):
+        super(CannotResolve, self).__init__("Cannot resolve ".format(qname))
+        self.what = " ".join(qname)
+
+
 def is_dir(path):
     return (
         path[1:] in root_namespace or
@@ -170,12 +176,19 @@ def _resolve(qname):
     while parts:
         name = parts.pop(0)
         if obj is None:
+            if name not in root_namespace:
+                raise CannotResolve(qname)
             obj = root_namespace[name]
         elif len(qname) - len(parts) == 2:
+            if name not in obj:
+                raise CannotResolve(qname)
             obj = obj[name]
         else:
             pyname = name[1:] if name.startswith(".") else name
-            obj = getattr(obj, pyname)
+            try:
+                obj = getattr(obj, pyname)
+            except AttributeError:
+                raise CannotResolve(qname)
     log.debug("Resolved {} to {})".format(qname, obj))
     return obj
 

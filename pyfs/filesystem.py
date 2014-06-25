@@ -30,6 +30,7 @@ from pyfs.mapping import (
     PATH_MODULES,
     read_from_string,
     reset_modules_list,
+    CannotResolve,
 )
 
 
@@ -45,6 +46,13 @@ class PyFS(fuse.Operations):
 
     @logcall
     def getattr(self, path, fh=None):
+        try:
+            return self.try_to_getattr(path, fh)
+        except CannotResolve:
+            raise fuse.FuseOSError(errno.ENOENT)
+
+    @logcall
+    def try_to_getattr(self, path, fh):
         if path == '/' or path == "/." or path == "/..":
             return dict(
                 st_mode=stat.S_IFDIR | 0555,
@@ -135,6 +143,6 @@ class PyFS(fuse.Operations):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(filename="pyfs.log", filemode="w")
+    logging.basicConfig(filename="pyfs.log", filemode="w+")
     logging.getLogger().setLevel(logging.DEBUG)
     fuse.FUSE(PyFS(), sys.argv[1])
