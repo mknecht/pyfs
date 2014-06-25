@@ -41,7 +41,7 @@ class PyFS(fuse.Operations):
         self._path_to_projectdir = path_to_projectdir
         self._next_fh = count()
         self._flags_for_open_files = {}  # file handle -> fh
-        for name in ("json", "os", "re", "string", "sys"):
+        for name in ("__builtin__", "json", "os", "re", "string", "sys"):
             add_module(name)
         self._log = logging.getLogger(self.__class__.__name__)
 
