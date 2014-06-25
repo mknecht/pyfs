@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #
-# Implementation of a filesystem that will show a file and a directory
-# when executing ls on the root.
+# A filesystem that maps a Python namespace to directories and files.
 #
 # Copyright (c) 2014 Murat Knecht
 # License: MIT
