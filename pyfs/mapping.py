@@ -118,13 +118,14 @@ def reset_modules_list():
 
 
 @logcall
-def get_content(path):
+def get_content(path, path_to_projectdir):
     if path == PATH_MODULES:
         return "\n".join(_get_modules())
     elif path.startswith(PATH_DOT_PREFIX):
-        return _render_template("dot", attr_name=path[len(PATH_DOT_PREFIX):])
+        return _render_template(
+            "dot", path_to_projectdir, attr_name=path[len(PATH_DOT_PREFIX):])
     else:
-        return _get_content_for_path(path)
+        return _get_content_for_path(path, path_to_projectdir)
 
 
 def _get_modules():
@@ -135,28 +136,29 @@ def _path_to_qname(path):
     return [n for n in path.split("/") if n]
 
 
-def _render_template(filename, **kwargs):
+def _render_template(filename, path_to_projectdir, **kwargs):
     assignments = dict(**kwargs)
-    assignments["pyfs_module_path"] = (
-        os.path.join(os.path.dirname(__file__), ".."))
-
+    assignments["pyfs_module_path"] = path_to_projectdir
+    log.warn(os.getcwd())
     with open(
-            os.path.join(
-                os.path.dirname(__file__),
-                "..",
-                "templates",
-                filename,
+            os.path.abspath(
+                os.path.join(
+                    path_to_projectdir,
+                    "templates",
+                    filename,
+                )
             )
             ) as f:
         return f.read().format(**assignments)
 
 
 @logcall
-def _get_content_for_path(path):
+def _get_content_for_path(path, path_to_projectdir):
     qname = _path_to_qname(path)
     if is_executable(path):
         return _render_template(
             "call_thing",
+            path_to_projectdir,
             modulename=".".join(qname[1:-1]),
             thingname=qname[-1],
         )

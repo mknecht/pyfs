@@ -36,8 +36,9 @@ from pyfs.mapping import (
 
 class PyFS(fuse.Operations):
 
-    def __init__(self):
+    def __init__(self, path_to_projectdir=None):
         super(PyFS, self).__init__()
+        self._path_to_projectdir = path_to_projectdir
         self._next_fh = count()
         self._flags_for_open_files = {}  # file handle -> fh
         for name in ("json", "os", "re", "string", "sys"):
@@ -62,7 +63,7 @@ class PyFS(fuse.Operations):
             return dict(
                 st_mode=stat.S_IFREG | 0555,
                 st_nlink=1,
-                st_size=len(get_content(path)),
+                st_size=len(get_content(path, self._path_to_projectdir)),
             )
         elif is_dir(path):
             return dict(
@@ -80,7 +81,7 @@ class PyFS(fuse.Operations):
             return dict(
                 st_mode=stat.S_IFREG | _get_file_mode(),
                 st_nlink=1,
-                st_size=len(get_content(path)),
+                st_size=len(get_content(path, self._path_to_projectdir)),
             )
         else:
             raise fuse.FuseOSError(errno.ENOENT)
@@ -88,7 +89,7 @@ class PyFS(fuse.Operations):
     @logcall
     def read(self, path, size, offset, fh):
         return read_from_string(
-            get_content(path),
+            get_content(path, self._path_to_projectdir),
             size,
             offset,
         )
@@ -145,4 +146,4 @@ class PyFS(fuse.Operations):
 if __name__ == '__main__':
     logging.basicConfig(filename="pyfs.log", filemode="w+")
     logging.getLogger().setLevel(logging.DEBUG)
-    fuse.FUSE(PyFS(), sys.argv[1])
+    fuse.FUSE(PyFS(os.getcwd()), sys.argv[1])

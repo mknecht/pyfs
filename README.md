@@ -111,6 +111,26 @@ If the attribute is callable, it will be called with the given arguments.
     $ echo Hello=world | dot/split = | lib/string/join ' -> '
     Hello -> world
 
+## How to use it
+
+Get fusepy.
+
+    pip install fusepy
+
+Clone the repo and run:
+
+	mkdir mountpoint
+    python  -m pyfs.filesystem mountpoint
+
+(No pip package / setup.py just yet, sorry!)
+
+In the dir `mountpoint` you'll find the filesystem to play with.
+
+Unmount using:
+
+    fusermount -u mountpoint
+
+
 ## More weird ideas for the future
 
 * Transform arguments by introspection:
