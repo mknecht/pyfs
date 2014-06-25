@@ -29,13 +29,18 @@ VALUE_TYPES = [
     types.TupleType,
 ]
 
-PATH_DOT_PREFIX = "/dot/"
-PATH_MODULES = "/run/modules"
+DIR_DOT = "dot"
+DIR_LIB = "lib"
+DIR_MODULES = "modules"
+DIR_RUN = "run"
+
+PATH_DOT_PREFIX = "/{}/".format(DIR_DOT)
+PATH_MODULES = "/{}/{}".format(DIR_RUN, DIR_MODULES)
 
 root_namespace = {
-    "dot": {},
-    "run": {"modules": None},
-    "lib": {},
+    DIR_DOT: {},
+    DIR_RUN: {DIR_MODULES: None},
+    DIR_LIB: {},
 }
 
 
@@ -107,14 +112,14 @@ def get_elements(path):
 
 def add_module(name):
     try:
-        root_namespace["lib"][name] = importlib.import_module(name)
+        root_namespace[DIR_LIB][name] = importlib.import_module(name)
     except ImportError:
         log.debug(traceback.format_exc())
         raise IOError(-errno.ENXIO)
 
 
 def reset_modules_list():
-    root_namespace["lib"] = {}
+    root_namespace[DIR_LIB] = {}
 
 
 @logcall
@@ -123,13 +128,13 @@ def get_content(path, path_to_projectdir):
         return "\n".join(_get_modules())
     elif path.startswith(PATH_DOT_PREFIX):
         return _render_template(
-            "dot", path_to_projectdir, attr_name=path[len(PATH_DOT_PREFIX):])
+            DIR_DOT, path_to_projectdir, attr_name=path[len(PATH_DOT_PREFIX):])
     else:
         return _get_content_for_path(path, path_to_projectdir)
 
 
 def _get_modules():
-    return root_namespace["lib"].keys()
+    return root_namespace[DIR_LIB].keys()
 
 
 def _path_to_qname(path):
