@@ -9,6 +9,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
 
+import __builtin__
 import errno
 from itertools import chain, count
 import os
@@ -20,13 +21,17 @@ import fuse
 
 from pyfs.mapping import (
     add_module,
+    add_symlink,
     is_dir,
     is_executable,
     is_file,
+    is_symlink,
     get_content,
     get_elements,
     logcall,
+    PATH_BIN_PREFIX,
     PATH_DOT_PREFIX,
+    PATH_LIB_PREFIX,
     PATH_MODULES,
     read_from_string,
     reset_modules_list,
@@ -43,6 +48,17 @@ class PyFS(fuse.Operations):
         self._flags_for_open_files = {}  # file handle -> fh
         for name in ("__builtin__", "json", "os", "re", "string", "sys"):
             add_module(name)
+        for name in dir(__builtin__):
+            sourcepath = "{}{}".format(PATH_BIN_PREFIX, name)
+            add_symlink(
+                sourcepath,
+                "{}{}{}/{}".format(
+                    "../" * (sourcepath.count("/") - 1),
+                    PATH_LIB_PREFIX[1:],
+                    "__builtin__",
+                    name
+                )
+            )
         self._log = logging.getLogger(self.__class__.__name__)
 
     @logcall
@@ -62,6 +78,12 @@ class PyFS(fuse.Operations):
         elif path.startswith(PATH_DOT_PREFIX) and not "." in path:
             return dict(
                 st_mode=stat.S_IFREG | 0555,
+                st_nlink=1,
+                st_size=len(get_content(path, self._path_to_projectdir)),
+            )
+        elif is_symlink(path):
+            return dict(
+                st_mode=stat.S_IFLNK | 0777,
                 st_nlink=1,
                 st_size=len(get_content(path, self._path_to_projectdir)),
             )
@@ -97,6 +119,10 @@ class PyFS(fuse.Operations):
     @logcall
     def readdir(self, path, fh):
         return [name for name in chain([".", ".."], get_elements(path))]
+
+    @logcall
+    def readlink(self, path):
+        return get_content(path, self._path_to_projectdir)
 
     def open(self, path, flags):
         if path == PATH_MODULES:

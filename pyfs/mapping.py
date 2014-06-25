@@ -29,15 +29,19 @@ VALUE_TYPES = [
     types.TupleType,
 ]
 
+DIR_BIN = "bin"
 DIR_DOT = "dot"
 DIR_LIB = "lib"
 DIR_MODULES = "modules"
 DIR_RUN = "run"
 
+PATH_BIN_PREFIX = "/{}/".format(DIR_BIN)
 PATH_DOT_PREFIX = "/{}/".format(DIR_DOT)
+PATH_LIB_PREFIX = "/{}/".format(DIR_LIB)
 PATH_MODULES = "/{}/{}".format(DIR_RUN, DIR_MODULES)
 
 root_namespace = {
+    DIR_BIN: {},
     DIR_DOT: {},
     DIR_RUN: {DIR_MODULES: None},
     DIR_LIB: {},
@@ -48,6 +52,16 @@ class CannotResolve(RuntimeError):
     def __init__(self, qname):
         super(CannotResolve, self).__init__("Cannot resolve ".format(qname))
         self.what = " ".join(qname)
+
+
+class SymLink(object):
+    def __init__(self, targetpath):
+        super(SymLink, self).__init__()
+        self._targetpath = targetpath
+
+    @property
+    def content(self):
+        return self._targetpath
 
 
 def is_dir(path):
@@ -68,6 +82,10 @@ def is_executable(path):
     return (
         hasattr(_resolve(_path_to_qname(path)), "__call__")
     )
+
+
+def is_symlink(path):
+    return isinstance(_resolve(_path_to_qname(path)), SymLink)
 
 
 @logcall
@@ -104,7 +122,11 @@ def get_elements(path):
             chosen_names.append(name)
         else:
             child_path = "/" + "/".join(qname + [name])
-            if is_file(child_path) or is_dir(child_path):
+            if (
+                    is_file(child_path) or
+                    is_dir(child_path) or
+                    is_symlink(child_path)
+            ):
                 chosen_names.append(name)
     log.debug("For {} got contents: {}".format(path, chosen_names))
     return chosen_names
@@ -116,6 +138,11 @@ def add_module(name):
     except ImportError:
         log.debug(traceback.format_exc())
         raise IOError(-errno.ENXIO)
+
+
+def add_symlink(sourcepath, targetpath):
+    source = _path_to_qname(sourcepath)
+    _resolve(source[:-1])[source[-1]] = SymLink(targetpath)
 
 
 def reset_modules_list():
@@ -160,6 +187,7 @@ def _render_template(filename, path_to_projectdir, **kwargs):
 @logcall
 def _get_content_for_path(path, path_to_projectdir):
     qname = _path_to_qname(path)
+    obj = _resolve(qname)
     if is_executable(path):
         return _render_template(
             "call_thing",
@@ -167,8 +195,9 @@ def _get_content_for_path(path, path_to_projectdir):
             modulename=".".join(qname[1:-1]),
             thingname=qname[-1],
         )
+    elif isinstance(obj, SymLink):
+        return obj.content
     elif _is_datafile(path):
-        obj = _resolve(qname)
         if isinstance(obj, list):
             return os.linesep.join(obj)
         return str(obj)

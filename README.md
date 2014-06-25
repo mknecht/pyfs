@@ -45,17 +45,19 @@ How does the root of the mountpoint look like? For example, like so:
 
     $ tree -L 2
     .
+    ├── bin
+    ├── dot
     ├── lib
     │   ├── __builtin__
     │   ├── json
     │   ├── os
+    │   ├── re
     │   ├── string
     │   └── sys
     └── run
         └── modules
     
-    7 directories, 1 file
-
+(Slightly cut.)
 
 ## Runtime modifications
 
@@ -92,6 +94,13 @@ Use pipes to concatenate Python commands. The dash character, “-”, marks the
 
 	lib$ echo Hello World | string/index - Wor | string/zfill - 10
 	0000000006
+
+## bin
+
+Add bin/ to your PATH and get everything from __builtin__ readily available:
+
+    $ pow 2 10
+	1024
 
 ## Object attributes
 
@@ -137,7 +146,6 @@ Unmount using:
   * positional parameters are made explicit by adding them to the argparse Parser
   * keyword parameters are turned into optional argparse arguments
 * `$ lib/SimpleHttpServer/.self 8080   # python -m SimpleHttpServer 8080`
-* provide symlinks for lib/__builtin__/*
 * provide a meta function to install packages in some virtualenv, so they can be loaded. (can I create a virtualenv at startup in memory and use that? /temp would be another option)
 
 To be continued …
